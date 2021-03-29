@@ -48,13 +48,15 @@ class Board:
 
     # makes n random points on board
     def make_points(self, n):
-        for point in range(n):
+        points_to_make = n
+        while n > 0:
             x = random.randint(0, self.width)
             y = random.randint(0, self.height)
 
             p = Point(x, y)
             if p not in self.points:
                 self.points.append(p)
+                n -= 1
 
     # checks if link doesn't intersect others
     def is_link_forbidden(self, link_to_check):
@@ -105,7 +107,7 @@ class Board:
             x_links = np.array([link[0].x, link[1].x])
             y_links = np.array([link[0].y, link[1].y])
 
-            plt.plot(x_links, y_links, color="blue")
+            plt.plot(x_links, y_links, color="black")
 
         plt.grid()
         plt.draw()
