@@ -10,7 +10,7 @@ class MapColoringConstraint(Constraint[str, str]):
         self.point1: str = point1
         self.point2: str = point2
 
-    def satisfied(self, assignment: Dict[str, str]) -> bool:
+    def satisfied(self, assignment: Dict[str, int]) -> bool:
         if self.point1 not in assignment or self.point2 not in assignment:
             return True
         return assignment[self.point1] != assignment[self.point2]
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     solution: Optional[List[Dict[str, str]]] = csp.backtracking_search()
     if not solution:
-        print("No solution found!")
+        print("There is no solution!")
     else:
         print("SOLUTIONS AMOUNT:", len(solution))
         for s in solution:
