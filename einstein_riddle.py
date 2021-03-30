@@ -105,8 +105,8 @@ if __name__ == "__main__":
     else:
         for sol in solution:
             for val in set(sol.values()):
-                values = []
+                result = []
                 for k, v in sol.items():
                     if val == v:
-                        values.append(k)
-                print(str(val) + ":", values)
+                        result.append(k)
+                print(str(val) + ":", result)

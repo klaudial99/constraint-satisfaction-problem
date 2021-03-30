@@ -89,7 +89,7 @@ class Board:
                 point_to_connect = dist[point][0]
                 link = (point, point_to_connect)
                 if not self.is_link_forbidden(link):
-                    self.links.append((point, point_to_connect))
+                    self.links.append(link)
                 # delete from possible end points
                 dist[point].remove(point_to_connect)
                 dist[point_to_connect].remove(point)

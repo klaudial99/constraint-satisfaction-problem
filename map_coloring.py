@@ -1,5 +1,4 @@
 from typing import Dict, List, Optional
-
 from Board import Board
 from csp import Constraint, CSP
 
@@ -17,7 +16,7 @@ class MapColoringConstraint(Constraint[str, str]):
 
 
 if __name__ == "__main__":
-    board = Board(20, 20)
+    board = Board(10, 10)
     board.make_points(5)
     board.make_links()
 
