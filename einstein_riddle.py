@@ -99,10 +99,12 @@ if __name__ == "__main__":
     csp.add_constraint(SameHouseNumberConstraint("Mentolowe", "Piwo"))
     csp.add_constraint(SameHouseNumberConstraint("Zielony", "Kawa"))
 
-    solution: Optional[List[Dict[str, int]]] = csp.backtracking_search()
+    #solution: Optional[List[Dict[str, int]]] = csp.backtracking_search()
+    solution: Optional[List[Dict[str, int]]] = csp.mac(csp.domains)
     if not solution:
         print("There is no solution!")
     else:
+        print("Steps:", csp.steps)
         for sol in solution:
             for val in set(sol.values()):
                 result = []
@@ -110,3 +112,4 @@ if __name__ == "__main__":
                     if val == v:
                         result.append(k)
                 print(str(val) + ":", result)
+
