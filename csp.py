@@ -49,7 +49,7 @@ class CSP(Generic[V, D]):
                 return False
         return True
 
-    def backtracking_search(self, value_bool: bool, assignment=None) -> Optional[List[Dict[V, D]]]:
+    def backtracking_search(self, variable_bool: bool, value_bool: bool, assignment=None) -> Optional[List[Dict[V, D]]]:
 
         results = []
         if assignment is None:
@@ -61,7 +61,10 @@ class CSP(Generic[V, D]):
         # unassigned variables
         unassigned: List[V] = [v for v in self.variables if v not in assignment]
 
+        # VARIABLE
         first: V = unassigned[0]
+        if variable_bool:
+            first: V = self.minimum_remaining_values_heuristic(unassigned, self.domains)[0]
 
         #VALUE
         values = self.domains[first]
@@ -74,7 +77,7 @@ class CSP(Generic[V, D]):
             self.steps += 1
 
             if self.check_consistency(first, local_assignment):
-                result: Optional[List[Dict[V, D]]] = self.backtracking_search(value_bool, local_assignment)
+                result: Optional[List[Dict[V, D]]] = self.backtracking_search(variable_bool, value_bool, local_assignment)
 
                 # add new solution to results
                 if result is not None:
@@ -84,7 +87,7 @@ class CSP(Generic[V, D]):
         else:
             return None
 
-    def mac(self, domains, assignment=None) -> Optional[List[Dict[V, D]]]:
+    def mac(self, variable_bool: bool, value_bool: bool, domains, assignment=None) -> Optional[List[Dict[V, D]]]:
         results = []
         if assignment is None:
             assignment = {}
@@ -95,8 +98,17 @@ class CSP(Generic[V, D]):
         # unassigned variables
         unassigned: List[V] = [v for v in self.variables if v not in assignment]
 
+        # VARIABLE
         first: V = unassigned[0]
-        for value in domains[first]:
+        if variable_bool:
+            first: V = self.minimum_remaining_values_heuristic(unassigned, domains)[0]
+
+        # VALUE
+        values = domains[first]
+        if value_bool:
+            values = self.least_constraining_value_heuristic(first, domains, assignment)
+
+        for value in values:
             dom = copy.deepcopy(domains)
             local_assignment = assignment.copy()
             local_assignment[first] = value
@@ -106,8 +118,7 @@ class CSP(Generic[V, D]):
             if not self.ac_3(dom, local_assignment): # next value if not satisfied
                 continue
             else:
-                #if self.check_consistency(first, local_assignment):
-                result: Optional[List[Dict[V, D]]] = self.mac(dom, local_assignment)
+                result: Optional[List[Dict[V, D]]] = self.mac(variable_bool, value_bool, dom, local_assignment)
 
                 # add new solution to results
                 if result is not None:
@@ -123,17 +134,6 @@ class CSP(Generic[V, D]):
         arcs = set()
         queue = set()
 
-        for con in unary:
-            new_domain = []
-            var = con.variables[0]
-            for val in domains[var]:
-                local_assignment = assignment.copy()
-                local_assignment[var] = val # a = {v: val}
-                #local_assignment = {var: val}
-                if con.satisfied(local_assignment):
-                    new_domain.append(val)
-            domains[var] = new_domain # setting new domains for unary constraints
-
         for var, constraints in self.constraints.items():
             for constr in constraints:
                 if len(constr.variables) > 1:
@@ -144,6 +144,15 @@ class CSP(Generic[V, D]):
                         queue.add(new)
                 else:
                     unary.append(constr)
+
+        for con in unary:
+            new_domain = []
+            var = con.variables[0]
+            for val in domains[var]:
+                local_assignment = {var: val}
+                if con.satisfied(local_assignment):
+                    new_domain.append(val)
+            domains[var] = new_domain # setting new domains for unary constraints
 
         while len(queue) > 0:
             actual_arc = list(queue)[0] # dequeue
@@ -177,7 +186,8 @@ class CSP(Generic[V, D]):
 
         return removed
 
-    def least_constraining_value_heuristic(self, variable: V, domains, assignment):
+    # VALUE HEURISTIC
+    def least_constraining_value_heuristic(self, variable: V, domains: Dict[V, List[D]], assignment):
 
         neighbours = []
         for constr in self.constraints[variable]:
@@ -204,7 +214,13 @@ class CSP(Generic[V, D]):
 
         return [k for k, v in sorted(values.items(), key=lambda item: item[1], reverse=True)] # list in correct order (most possibilities first)
 
+    # VARIABLE HEURISTIC
+    def minimum_remaining_values_heuristic(self, variables: List[V], domains: Dict[V, List[D]]):
+        domains_length = {}
+        for var in variables:
+            domains_length[var] = len(domains[var])
 
+        return [k for k, v in sorted(domains_length.items(), key=lambda item: item[1], reverse=False)] # list in correct order (least possibilities first)
 
 
 

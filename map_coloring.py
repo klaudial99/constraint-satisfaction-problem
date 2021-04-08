@@ -29,8 +29,8 @@ if __name__ == "__main__":
     for link in board.links:
         csp.add_constraint(MapColoringConstraint(link[0], link[1]))
 
-    #solution: Optional[List[Dict[str, str]]] = csp.backtracking_search()
-    solution: Optional[List[Dict[str, str]]] = csp.mac(csp.domains)
+    solution: Optional[List[Dict[str, str]]] = csp.backtracking_search(True, False)
+    #solution: Optional[List[Dict[str, str]]] = csp.mac(False, False, csp.domains)
     if not solution:
         print("There is no solution!")
     else:
@@ -38,6 +38,3 @@ if __name__ == "__main__":
         print("SOLUTIONS AMOUNT:", len(solution))
         for s in solution:
             board.draw_board(s)
-
-
-
