@@ -16,7 +16,7 @@ class MapColoringConstraint(Constraint[str, str]):
 
 
 if __name__ == "__main__":
-    board = Board(10, 10)
+    board = Board(15, 15)
     board.make_points(10)
     board.make_links()
 
@@ -29,8 +29,9 @@ if __name__ == "__main__":
     for link in board.links:
         csp.add_constraint(MapColoringConstraint(link[0], link[1]))
 
-    solution: Optional[List[Dict[str, str]]] = csp.backtracking_search(True, False)
-    #solution: Optional[List[Dict[str, str]]] = csp.mac(False, False, csp.domains)
+    solution: Optional[List[Dict[str, str]]] = csp.backtracking_search(False, True)
+    #solution: Optional[List[Dict[str, int]]] = csp.forward_checking(False, True, csp.domains)
+    #solution: Optional[List[Dict[str, str]]] = csp.mac(False, True, csp.domains)
     if not solution:
         print("There is no solution!")
     else:

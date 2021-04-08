@@ -128,6 +128,80 @@ class CSP(Generic[V, D]):
         else:
             return None
 
+    def forward_checking(self, variable_bool: bool, value_bool: bool, domains, assignment=None) -> Optional[List[Dict[V, D]]]:
+
+        results = []
+
+        if assignment is None:
+            assignment = {}
+        # all variables are assigned
+        if len(assignment) == len(self.variables):
+            return [assignment]
+
+        # unassigned variables
+        unassigned: List[V] = [v for v in self.variables if v not in assignment]
+
+        # VARIABLE
+        first: V = unassigned[0]
+        if variable_bool:
+            first: V = self.minimum_remaining_values_heuristic(unassigned, domains)[0]
+
+        # VALUE
+        values = domains[first]
+        if value_bool:
+            values = self.least_constraining_value_heuristic(first, domains, assignment)
+
+        for value in values:
+            dom = copy.deepcopy(domains)
+            local_assignment = assignment.copy()
+            local_assignment[first] = value
+            self.steps += 1
+            dom[first] = [value]
+
+            if not self.forward_checking_helper(first, dom, local_assignment):  # next value if not satisfied
+                continue
+
+            else:
+                result: Optional[List[Dict[V, D]]] = self.forward_checking(variable_bool, value_bool, dom, local_assignment)
+
+                # add new solution to results
+                if result is not None:
+                    results.extend(result)
+
+        if len(results) != 0:
+            return results
+        else:
+            return None
+
+    def forward_checking_helper(self, variable: V, domains: Dict[V, List[D]], assignment: Dict[V, D]):
+        neighbours = []
+        for constr in self.constraints[variable]:
+            if len(constr.variables) > 1:
+                multi = list(permutations(constr.variables, 2)) # list of pairs of variables in constraint
+                for arc in multi: # adding arcs
+                    if arc[0] == variable and arc[1] not in assignment.keys():
+                        new_arc = Arc(arc[0], arc[1], constr)
+                        neighbours.append(new_arc)
+            else: # checking unary constraint
+                local_assignment = {variable: assignment[variable]}
+                if not constr.satisfied(local_assignment):
+                    return False
+
+        new_assignment = {variable: assignment[variable]} # assignment only with variable + neighbour later
+        for neighbour in neighbours: # neighbour = arc
+            local_domain = copy.deepcopy(domains)
+            for val_nei in domains[neighbour.end]: # possible values for neighbour
+                new_assignment[neighbour.end] = val_nei
+                if not neighbour.const.satisfied(new_assignment): # delete from domain if not satisfies
+                    local_domain[neighbour.end].remove(val_nei)
+            if len(local_domain[neighbour.end]) == 0:
+                return False
+            if len(local_domain[neighbour.end]) != len(domains[neighbour.end]):
+                domains[neighbour.end] = local_domain[neighbour.end]
+            del new_assignment[neighbour.end]
+
+        return True
+
     def ac_3(self, domains, assignment) -> bool:
 
         unary = []
@@ -195,9 +269,7 @@ class CSP(Generic[V, D]):
                 multi = list(permutations(constr.variables, 2)) # list of pairs of variables in constraint
                 for arc in multi: # adding arcs
                     if arc[1] not in assignment.keys():
-
                         new_arc = Arc(arc[0], arc[1], constr)
-                        #neighbours[arc[1]] = len(domains[arc[1]])
                         neighbours.append(new_arc)
 
         values = {}
@@ -221,8 +293,3 @@ class CSP(Generic[V, D]):
             domains_length[var] = len(domains[var])
 
         return [k for k, v in sorted(domains_length.items(), key=lambda item: item[1], reverse=False)] # list in correct order (least possibilities first)
-
-
-
-
-

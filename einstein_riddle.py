@@ -99,8 +99,9 @@ if __name__ == "__main__":
     csp.add_constraint(SameHouseNumberConstraint("Mentolowe", "Piwo"))
     csp.add_constraint(SameHouseNumberConstraint("Zielony", "Kawa"))
 
-    #solution: Optional[List[Dict[str, int]]] = csp.backtracking_search(True, False)
-    solution: Optional[List[Dict[str, int]]] = csp.mac(False, False, csp.domains)
+    #solution: Optional[List[Dict[str, int]]] = csp.backtracking_search(False, True)
+    #solution: Optional[List[Dict[str, int]]] = csp.forward_checking(False, True, csp.domains)
+    solution: Optional[List[Dict[str, int]]] = csp.mac(False, True, csp.domains)
     if not solution:
         print("There is no solution!")
     else:
