@@ -115,4 +115,3 @@ class Board:
 
     def __str__(self):
         return "WIDTH: " + str(self.width) + "\nHEIGHT: " + str(self.height) + "\nLINKS: " + str(self.links)
-
