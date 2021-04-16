@@ -49,7 +49,7 @@ class Board:
     # makes n random points on board
     def make_points(self, n):
         points_to_make = n
-        random.seed(10)
+        random.seed(15)
         while n > 0:
             x = random.randint(0, self.width)
             y = random.randint(0, self.height)

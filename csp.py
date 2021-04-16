@@ -49,14 +49,17 @@ class CSP(Generic[V, D]):
                 return False
         return True
 
-    def backtracking_search(self, variable_bool: bool, value_bool: bool, assignment=None) -> Optional[List[Dict[V, D]]]:
+    def backtracking_search(self, variable_bool: bool, value_bool: bool, single_bool: bool, assignment=None) -> Optional[List[Dict[V, D]]]:
 
         results = []
         if assignment is None:
             assignment = {}
         # all variables are assigned
         if len(assignment) == len(self.variables):
-            return [assignment]
+            if single_bool:
+                return assignment
+            else:
+                return [assignment]
 
         # unassigned variables
         unassigned: List[V] = [v for v in self.variables if v not in assignment]
@@ -77,23 +80,31 @@ class CSP(Generic[V, D]):
             self.steps += 1
 
             if self.check_consistency(first, local_assignment):
-                result: Optional[List[Dict[V, D]]] = self.backtracking_search(variable_bool, value_bool, local_assignment)
+                result: Optional[List[Dict[V, D]]] = self.backtracking_search(variable_bool, value_bool, single_bool, local_assignment)
 
                 # add new solution to results
                 if result is not None:
-                    results.extend(result)
-        if results is not None:
+                    if single_bool:
+                        return result
+                    else:
+                        results.extend(result)
+        if single_bool:
+            return None
+        if results is not None and len(results) != 0:
             return results
         else:
             return None
 
-    def mac(self, variable_bool: bool, value_bool: bool, domains, assignment=None) -> Optional[List[Dict[V, D]]]:
+    def mac(self, variable_bool: bool, value_bool: bool, single_bool: bool, domains, assignment=None) -> Optional[List[Dict[V, D]]]:
         results = []
         if assignment is None:
             assignment = {}
         # all variables are assigned
         if len(assignment) == len(self.variables):
-            return [assignment]
+            if single_bool:
+                return assignment
+            else:
+                return [assignment]
 
         # unassigned variables
         unassigned: List[V] = [v for v in self.variables if v not in assignment]
@@ -118,17 +129,22 @@ class CSP(Generic[V, D]):
             if not self.ac_3(dom, local_assignment): # next value if not satisfied
                 continue
             else:
-                result: Optional[List[Dict[V, D]]] = self.mac(variable_bool, value_bool, dom, local_assignment)
+                result: Optional[List[Dict[V, D]]] = self.mac(variable_bool, value_bool, single_bool, dom, local_assignment)
 
                 # add new solution to results
                 if result is not None:
-                    results.extend(result)
-        if len(results) != 0:
+                    if single_bool:
+                        return result
+                    else:
+                        results.extend(result)
+        if single_bool:
+            return None
+        if results is not None and len(results) != 0:
             return results
         else:
             return None
 
-    def forward_checking(self, variable_bool: bool, value_bool: bool, domains, assignment=None) -> Optional[List[Dict[V, D]]]:
+    def forward_checking(self, variable_bool: bool, value_bool: bool, single_bool: bool, domains, assignment=None) -> Optional[List[Dict[V, D]]]:
 
         results = []
 
@@ -136,7 +152,10 @@ class CSP(Generic[V, D]):
             assignment = {}
         # all variables are assigned
         if len(assignment) == len(self.variables):
-            return [assignment]
+            if single_bool:
+                return assignment
+            else:
+                return [assignment]
 
         # unassigned variables
         unassigned: List[V] = [v for v in self.variables if v not in assignment]
@@ -162,13 +181,17 @@ class CSP(Generic[V, D]):
                 continue
 
             else:
-                result: Optional[List[Dict[V, D]]] = self.forward_checking(variable_bool, value_bool, dom, local_assignment)
+                result: Optional[List[Dict[V, D]]] = self.forward_checking(variable_bool, value_bool, single_bool, dom, local_assignment)
 
                 # add new solution to results
                 if result is not None:
-                    results.extend(result)
-
-        if len(results) != 0:
+                    if single_bool:
+                        return result
+                    else:
+                        results.extend(result)
+        if single_bool:
+            return None
+        if results is not None and len(results) != 0:
             return results
         else:
             return None

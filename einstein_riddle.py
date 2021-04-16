@@ -1,5 +1,5 @@
 from typing import List, Dict, Optional
-
+import time
 from csp import CSP, Constraint
 
 
@@ -99,18 +99,21 @@ if __name__ == "__main__":
     csp.add_constraint(SameHouseNumberConstraint("Mentolowe", "Piwo"))
     csp.add_constraint(SameHouseNumberConstraint("Zielony", "Kawa"))
 
-    #solution: Optional[List[Dict[str, int]]] = csp.backtracking_search(False, True)
-    #solution: Optional[List[Dict[str, int]]] = csp.forward_checking(False, True, csp.domains)
-    solution: Optional[List[Dict[str, int]]] = csp.mac(False, True, csp.domains)
+    start_time = time.time()
+    solution: Optional[List[Dict[str, int]]] = csp.backtracking_search(True, True, False)
+    #solution: Optional[List[Dict[str, int]]] = csp.forward_checking(False, True, True, csp.domains)
+    #solution: Optional[List[Dict[str, int]]] = csp.mac(True, True, True, csp.domains)
     if not solution:
         print("There is no solution!")
     else:
+        print("--- %s seconds ---" % (time.time() - start_time))
         print("Steps:", csp.steps)
-        for sol in solution:
-            for val in set(sol.values()):
-                result = []
-                for k, v in sol.items():
-                    if val == v:
-                        result.append(k)
-                print(str(val) + ":", result)
+        print(solution)
+        # for sol in solution:
+        #     for val in set(sol.values()):
+        #         result = []
+        #         for k, v in sol.items():
+        #             if val == v:
+        #                 result.append(k)
+        #         print(str(val) + ":", result)
 
